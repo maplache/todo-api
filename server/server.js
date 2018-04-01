@@ -14,10 +14,11 @@ var app = express();
 app.use(bodyParser.json());
 
 // Routing
-app.post('/todos', (req, res) => {
-  console.log(req.body);
 
-  // Crear todo
+// Nuevo todo
+app.post('/todos', (req, res) => {
+
+  // Crear objeto todo
   var todo = new Todo({
     text: req.body.text
   });
@@ -26,7 +27,18 @@ app.post('/todos', (req, res) => {
   todo.save().then( (doc) => {
     res.send(doc);
   }, (error) => {
-    res.status(400).send(e);
+    res.status(400).send(error);
+  });
+});
+
+// Buscar todos los todos
+app.get('/todos', (req, res) => {
+
+  // Buscar todos los todos
+  Todo.find().then( (todos) => {
+    res.send({todos});
+  }, (error) => {
+    res.status(400).send(error);
   });
 });
 
@@ -34,3 +46,5 @@ app.post('/todos', (req, res) => {
 app.listen(port, () => {
   console.log(`Listening on port ${port}`);
 });
+
+module.exports = {app};
