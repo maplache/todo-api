@@ -1,9 +1,10 @@
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
+const {ObjectID} = require('mongodb');
 
-var {mongoose} = require('./db/mongoose');
-var {Todo} = require('./models/todo');
-var {User} = require('./models/user');
+const {mongoose} = require('./db/mongoose');
+const {Todo} = require('./models/todo');
+const {User} = require('./models/user');
 
 //Puerto que Heroku decide usar
 const port = process.env.PORT || 3000;
@@ -39,6 +40,30 @@ app.get('/todos', (req, res) => {
     res.send({todos});
   }, (error) => {
     res.status(400).send(error);
+  });
+});
+
+// Buscar todo especifico
+app.get('/todos/:id', (req, res) => {
+
+  // ID del todo
+  var id = req.params.id;
+
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send();
+  }
+
+  // Buscar todo por id
+  Todo.findById(id).then( (todo) => {
+
+    if(!todo){
+      return res.status(404).send();
+    }
+
+    res.send({todo});
+    
+  }, (error) => {
+    res.status(400).send();
   });
 });
 
