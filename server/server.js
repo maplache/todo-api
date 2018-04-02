@@ -1,3 +1,4 @@
+const _ = require('lodash');
 const express = require('express');
 const bodyParser = require('body-parser');
 const {ObjectID} = require('mongodb');
@@ -89,6 +90,41 @@ app.delete('/todos/:id', (req, res) => {
     res.status(400).send();
   });
 
+});
+
+app.patch('/todos/:id', (req, res) => {
+
+  // ID del todo
+  var id = req.params.id;
+  var body = _.pick(req.body, ['text', 'completed']);
+
+  if(!ObjectID.isValid(id)){
+    return res.status(404).send();
+  }
+
+  // Si se mando 'completed'
+  if(_.isBoolean(body.completed)){
+
+    if(body.completed){
+      body.completedAt = new Date().getTime();
+    } else {
+      body.completed = false;
+      body.completedAt = null;
+    }
+  }
+
+  // Actualizar todo. Pasamos el ID, los campos a actualizar con $set, opciones
+  Todo.findByIdAndUpdate(id, {$set: body}, {new: true}).then( (todo) => {
+
+    if(!todo){
+      return res.status(404).send();
+    }
+
+    res.send({todo});
+
+  }, (error) => {
+    res.status(400).send();
+  });
 });
 
 // Inicializar
